@@ -1,0 +1,86 @@
+.profile-container {
+  text-align: center;
+  margin-top: 40px;
+  position: relative;
+}
+
+
+.h2{
+  position: relative;
+  right: 70px;
+}
+
+.profile-img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 3px solid #555;
+  transition: transform 0.2s ease;
+}
+
+.profile-img:hover {
+  transform: scale(1.05);
+}
+
+.upload-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #2e8b57;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  position: relative;
+  top: 60px;
+  right: 120px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.upload-btn:hover {
+  background-color: #256a45;
+}
+
+.admin-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  position: relative;
+  top: 60px;
+  left: 120px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.admin-btn:hover {
+  background-color: #0056b3;
+}
+
+.logout-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}
+
+.success {
+  color: green;
+  margin-top: 100px;
+  margin-right: 80px;
+}
