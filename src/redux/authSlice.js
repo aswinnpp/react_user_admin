@@ -38,6 +38,14 @@ const authSlice = createSlice({
       state.users = [];
       state.adminLoading = false;
       state.adminError = null;
+      
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // Clear cookies
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     },
     updateImage(state, action) {
       if (state.user) {

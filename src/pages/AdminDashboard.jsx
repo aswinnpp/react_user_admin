@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../redux/authSlice';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
   const { token } = useSelector(state => state.auth);
+  const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -21,7 +23,9 @@ export default function AdminDashboard() {
       const res = await axios.get('http://localhost:5000/api/admin/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(res.data);
+      // Filter to show only users with role 'user'
+      const filteredUsers = res.data.filter(user => user.role === 'user');
+      setUsers(filteredUsers);
     } catch (err) {
       console.error('Fetch all users error:', err.response?.data || err.message);
     } finally {
@@ -36,7 +40,9 @@ export default function AdminDashboard() {
       const res = await axios.get(`http://localhost:5000/api/admin/users?search=${search}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(res.data);
+      // Filter to show only users with role 'user'
+      const filteredUsers = res.data.filter(user => user.role === 'user');
+      setUsers(filteredUsers);
     } catch (err) {
       console.error('Fetch searched users error:', err.response?.data || err.message);
     } finally {
@@ -366,11 +372,26 @@ export default function AdminDashboard() {
                     )}
                   </td>
                 </tr>
+
+
+
               ))}
+               <button 
+        className="logout-btn"
+        onClick={() => dispatch(logout())}
+      >
+        Logout
+      </button>
             </tbody>
+            
           </table>
+
+         
         </div>
+
+        
       </div>
+ 
     </div>
   );
 }

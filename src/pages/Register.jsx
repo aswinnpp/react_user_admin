@@ -25,7 +25,16 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        // Handle specific error cases
+        if (response.status === 409) {
+          throw new Error('Email already exists. Please use a different email address.');
+        } else if (response.status === 400) {
+          throw new Error(data.message || 'Please check your input');
+        } else if (data.message) {
+          throw new Error(data.message);
+        } else {
+          throw new Error('Registration failed. Please try again.');
+        }
       }
 
       // On success, redirect to login page

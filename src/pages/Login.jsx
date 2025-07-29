@@ -24,7 +24,19 @@ export default function Login() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      
+      if (!res.ok) {
+        // Handle specific error cases
+        if (res.status === 401) {
+          throw new Error('Invalid credentials. Please check your email and password.');
+        } else if (res.status === 400) {
+          throw new Error(data.message || 'Please check your input');
+        } else if (data.message) {
+          throw new Error(data.message);
+        } else {
+          throw new Error('Login failed. Please try again.');
+        }
+      }
 
       const token = data.token;
       const user = data.user; // Use the user data from backend response
