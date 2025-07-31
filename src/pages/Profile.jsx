@@ -16,7 +16,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState("");
 
-  // Initialize profile image from Redux store
   useEffect(() => {
     if (user?.image) {
       setProfileImage(`http://localhost:5000/uploads/${user.image}`);
@@ -25,30 +24,29 @@ export default function Profile() {
     }
   }, [user?.image]);
 
-  // Fetch the latest profile image from the DB only if needed
+ 
   useEffect(() => {
     const fetchProfileImage = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(
-          'http://localhost:5000/api/profile/image',
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            }
-          }
-        );
+   ;
+       const response = await axios.get(
+  'http://localhost:5000/api/profile/image',
+  {
+    withCredentials: true, 
+  }
+);
+
         if (response.data && response.data.image) {
           setProfileImage(`http://localhost:5000/uploads/${response.data.image}`);
           dispatch(updateImage(response.data.image));
         }
       } catch (error) {
         console.error('Error fetching profile image:', error);
-        // Keep the current image from Redux store if fetch fails
+      
       }
     };
 
-    // Only fetch if we don't have an image in Redux store
+  
     if (!user?.image || user.image === 'default.png') {
       fetchProfileImage();
     }
@@ -60,7 +58,7 @@ export default function Profile() {
       setFile(selected);
       setSuccess("");
       
-      // Create preview URL for the selected image
+     
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewUrl(e.target.result);
@@ -72,26 +70,25 @@ export default function Profile() {
   const handleUpload = async () => {
     if (!file) return;
     setLoading(true);
-    const token = localStorage.getItem('token');
+   
     const formData = new FormData();
     formData.append('image', file);
 
     try {
       const response = await axios.put(
-        'http://localhost:5000/api/profile/uploads',
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        }
-      );
+  'http://localhost:5000/api/profile/uploads',
+  formData,
+  {
+    withCredentials: true,
+  }
+);
+
       if (response.data && response.data.image) {
         dispatch(updateImage(response.data.image));
         setProfileImage(`http://localhost:5000/uploads/${response.data.image}`);
         setSuccess('Image uploaded successfully!');
         setFile(null);
-        setPreviewUrl(""); // Clear preview after successful upload
+        setPreviewUrl(""); 
       }
     } catch (error) {
       setSuccess('Failed to upload image.');
@@ -101,12 +98,17 @@ export default function Profile() {
     }
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+ const handleLogout = async () => {
+  try {
+    await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+
+  dispatch(logout());
+  navigate('/login');
+};
+
 
   useEffect(() => {
     if (success) {
@@ -115,7 +117,6 @@ export default function Profile() {
     }
   }, [success]);
 
-  // Determine which image to display
   const displayImage = previewUrl || profileImage || `http://localhost:5000/uploads/default.png`;
 
   return (

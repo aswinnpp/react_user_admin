@@ -2,12 +2,16 @@
 import jwt from 'jsonwebtoken';
 
 export const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  console.log('Token:', token);
-  if (!token) return res.status(401).json({ msg: 'No token' });
+  const token = req.cookies.token; 
+
+  console.log('Token from cookie:', token);
+
+  if (!token) {
+    return res.status(401).json({ msg: 'No token provided' });
+  }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jwtsecret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Decoded token:', decoded);
     req.user = decoded;
     req.userId = decoded.id;

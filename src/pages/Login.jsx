@@ -20,13 +20,14 @@ export default function Login() {
       const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
       
       if (!res.ok) {
-        // Handle specific error cases
+        
         if (res.status === 401) {
           throw new Error('Invalid credentials. Please check your email and password.');
         } else if (res.status === 400) {
@@ -39,18 +40,14 @@ export default function Login() {
       }
 
       const token = data.token;
-      const user = data.user; // Use the user data from backend response
+      const user = data.user;
 
-      // Create user object with all necessary fields including image and role
       const userData = {
         name: user.name,
         id: user._id,
-        role: user.role, // Store the role directly from database
-        image: user.image || 'default.png', // Include the profile image
+        role: user.role, 
+        image: user.image || 'default.png', 
       };
-
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
 
       dispatch(loginSuccess({ token, user: userData }));
 

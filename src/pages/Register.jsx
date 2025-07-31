@@ -25,7 +25,6 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Handle specific error cases
         if (response.status === 409) {
           throw new Error('Email already exists. Please use a different email address.');
         } else if (response.status === 400) {
@@ -37,7 +36,7 @@ export default function Register() {
         }
       }
 
-      // On success, redirect to login page
+     
       navigate('/login');
     } catch (err) {
       setError(err.message);

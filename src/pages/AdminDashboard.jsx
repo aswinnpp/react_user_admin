@@ -17,13 +17,13 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const fetchAllUsers = async () => {
+ const fetchAllUsers = async () => {
     setLoading(true);
     try {
       const res = await axios.get('http://localhost:5000/api/admin/users', {
-        headers: { Authorization: `Bearer ${token}` }
+        withCredentials: true 
       });
-      // Filter to show only users with role 'user'
+
       const filteredUsers = res.data.filter(user => user.role === 'user');
       setUsers(filteredUsers);
     } catch (err) {
@@ -33,14 +33,13 @@ export default function AdminDashboard() {
     }
   };
 
-  // Fetch users by search
   const fetchSearchedUsers = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`http://localhost:5000/api/admin/users?search=${search}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        withCredentials: true
       });
-      // Filter to show only users with role 'user'
+
       const filteredUsers = res.data.filter(user => user.role === 'user');
       setUsers(filteredUsers);
     } catch (err) {
@@ -50,20 +49,16 @@ export default function AdminDashboard() {
     }
   };
 
-  // On mount, fetch all users
   useEffect(() => {
     fetchAllUsers();
-    // eslint-disable-next-line
   }, []);
 
-  // When search changes, fetch by search if search is not empty, else fetch all
   useEffect(() => {
     if (search.trim() === '') {
       fetchAllUsers();
     } else {
       fetchSearchedUsers();
     }
-    // eslint-disable-next-line
   }, [search]);
 
   const handleCreateUser = async (e) => {
@@ -76,8 +71,8 @@ export default function AdminDashboard() {
 
     try {
       await axios.post('http://localhost:5000/api/admin/users', formData, {
+        withCredentials: true,
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
@@ -96,7 +91,7 @@ export default function AdminDashboard() {
       setLoading(true);
       try {
         await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          withCredentials: true
         });
         fetchAllUsers();
       } catch (err) {
@@ -109,11 +104,11 @@ export default function AdminDashboard() {
 
   const startEdit = (user) => {
     setEditingUserId(user._id);
-    setEditUserData({ 
-      name: user.name, 
-      email: user.email, 
+    setEditUserData({
+      name: user.name,
+      email: user.email,
       role: user.role,
-      image: null 
+      image: null
     });
     setEditPreviewUrl(null);
   };
@@ -127,8 +122,8 @@ export default function AdminDashboard() {
       });
 
       await axios.put(`http://localhost:5000/api/admin/users/${id}`, formData, {
+        withCredentials: true,
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
@@ -158,8 +153,7 @@ export default function AdminDashboard() {
     const selected = e.target.files[0];
     if (selected) {
       setEditUserData({ ...editUserData, image: selected });
-      
-      // Create preview URL for the selected image
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setEditPreviewUrl(e.target.result);
@@ -174,6 +168,7 @@ export default function AdminDashboard() {
     }
     return `http://localhost:5000/uploads/${user.image || 'default.png'}`;
   };
+
 
   return (
     <div className="admin-container">

@@ -46,37 +46,59 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    // Validate required fields
+
+    // Validate input
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
-    
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please enter a valid email address' });
     }
-    
+
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-    
-    // Check password
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ 
-      id: user._id, 
-      role: user.role,
-      name: user.name 
-    }, process.env.JWT_SECRET || 'jwtsecret');
-    
-    res.json({ token, user });
+    // Sign JWT
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+        name: user.name
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    // Set token in HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // true in production with HTTPS
+      sameSite: 'Lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    // Send user info (no token in body)
+    res.json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        role: user.role,
+        email: user.email,
+        image: user.image
+      }
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Login failed' });
