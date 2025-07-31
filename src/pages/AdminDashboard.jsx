@@ -5,7 +5,6 @@ import { logout } from '../redux/authSlice';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  const { token } = useSelector(state => state.auth);
   const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
@@ -15,19 +14,18 @@ export default function AdminDashboard() {
   const [editUserData, setEditUserData] = useState({ name: '', email: '', role: 'user', image: null });
   const [editPreviewUrl, setEditPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
- const fetchAllUsers = async () => {
+  const fetchAllUsers = async () => {
     setLoading(true);
     try {
       const res = await axios.get('http://localhost:5000/api/admin/users', {
-        withCredentials: true 
+        withCredentials: true
       });
-
       const filteredUsers = res.data.filter(user => user.role === 'user');
       setUsers(filteredUsers);
     } catch (err) {
-      console.error('Fetch all users error:', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -39,11 +37,9 @@ export default function AdminDashboard() {
       const res = await axios.get(`http://localhost:5000/api/admin/users?search=${search}`, {
         withCredentials: true
       });
-
       const filteredUsers = res.data.filter(user => user.role === 'user');
       setUsers(filteredUsers);
     } catch (err) {
-      console.error('Fetch searched users error:', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -64,11 +60,11 @@ export default function AdminDashboard() {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     const formData = new FormData();
     Object.entries(newUser).forEach(([key, val]) => {
       if (val !== null) formData.append(key, val);
     });
-
     try {
       await axios.post('http://localhost:5000/api/admin/users', formData, {
         withCredentials: true,
@@ -80,7 +76,11 @@ export default function AdminDashboard() {
       setShowAddForm(false);
       fetchAllUsers();
     } catch (err) {
-      console.error('Create error:', err.response?.data || err.message);
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Failed to create user.');
+      }
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,6 @@ export default function AdminDashboard() {
         });
         fetchAllUsers();
       } catch (err) {
-        console.error('Delete error:', err.response?.data || err.message);
       } finally {
         setLoading(false);
       }
@@ -120,7 +119,6 @@ export default function AdminDashboard() {
       Object.entries(editUserData).forEach(([key, val]) => {
         if (val !== null) formData.append(key, val);
       });
-
       await axios.put(`http://localhost:5000/api/admin/users/${id}`, formData, {
         withCredentials: true,
         headers: {
@@ -131,7 +129,6 @@ export default function AdminDashboard() {
       setEditPreviewUrl(null);
       fetchAllUsers();
     } catch (err) {
-      console.error('Update error:', err.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -153,7 +150,6 @@ export default function AdminDashboard() {
     const selected = e.target.files[0];
     if (selected) {
       setEditUserData({ ...editUserData, image: selected });
-
       const reader = new FileReader();
       reader.onload = (e) => {
         setEditPreviewUrl(e.target.result);
@@ -169,19 +165,20 @@ export default function AdminDashboard() {
     return `http://localhost:5000/uploads/${user.image || 'default.png'}`;
   };
 
-
   return (
     <div className="admin-container">
       <div className="admin-header">
         <h2>Admin Dashboard</h2>
-        <button 
+        <button className="logout-btn" onClick={() => dispatch(logout())}>
+          Logout
+        </button>
+        <button
           className="add-user-btn"
           onClick={() => setShowAddForm(!showAddForm)}
         >
           {showAddForm ? 'Cancel' : 'Add New User'}
         </button>
       </div>
-
       <div className="search-section">
         <input
           type="text"
@@ -191,10 +188,10 @@ export default function AdminDashboard() {
           className="search-input"
         />
       </div>
-
       {showAddForm && (
         <div className="add-user-form">
           <h3>Create New User</h3>
+          {error && <div  style={{color:"red"}} className="error-message">{error}</div>}
           <form onSubmit={handleCreateUser}>
             <div className="form-row">
               <input
@@ -202,7 +199,7 @@ export default function AdminDashboard() {
                 placeholder="Name"
                 value={newUser.name}
                 onChange={e => setNewUser({ ...newUser, name: e.target.value })}
-                required
+                
                 className="form-input"
               />
               <input
@@ -210,7 +207,7 @@ export default function AdminDashboard() {
                 placeholder="Email"
                 value={newUser.email}
                 onChange={e => setNewUser({ ...newUser, email: e.target.value })}
-                required
+                
                 className="form-input"
               />
             </div>
@@ -220,7 +217,7 @@ export default function AdminDashboard() {
                 placeholder="Password"
                 value={newUser.password}
                 onChange={e => setNewUser({ ...newUser, password: e.target.value })}
-                required
+                
                 className="form-input"
               />
               <select
@@ -246,11 +243,9 @@ export default function AdminDashboard() {
           </form>
         </div>
       )}
-
       <div className="users-section">
         <h3>Users ({users.length})</h3>
         {loading && <div className="loading">Loading...</div>}
-        
         <div className="table-container">
           <table className="users-table">
             <thead>
@@ -332,15 +327,15 @@ export default function AdminDashboard() {
                   <td>
                     {editingUserId === user._id ? (
                       <div className="edit-actions">
-                        <button 
-                          onClick={() => handleUpdateUser(user._id)} 
+                        <button
+                          onClick={() => handleUpdateUser(user._id)}
                           className="save-btn"
                           disabled={loading}
                         >
                           {loading ? 'Saving...' : 'Save'}
                         </button>
-                        <button 
-                          onClick={cancelEdit} 
+                        <button
+                          onClick={cancelEdit}
                           className="cancel-btn"
                           disabled={loading}
                         >
@@ -349,15 +344,15 @@ export default function AdminDashboard() {
                       </div>
                     ) : (
                       <div className="action-buttons">
-                        <button 
-                          onClick={() => startEdit(user)} 
+                        <button
+                          onClick={() => startEdit(user)}
                           className="edit-btn"
                           disabled={loading}
                         >
                           Edit
                         </button>
-                        <button 
-                          onClick={() => handleDeleteUser(user._id)} 
+                        <button
+                          onClick={() => handleDeleteUser(user._id)}
                           className="delete-btn"
                           disabled={loading}
                         >
@@ -367,26 +362,11 @@ export default function AdminDashboard() {
                     )}
                   </td>
                 </tr>
-
-
-
               ))}
-               <button 
-        className="logout-btn"
-        onClick={() => dispatch(logout())}
-      >
-        Logout
-      </button>
             </tbody>
-            
           </table>
-
-         
         </div>
-
-        
       </div>
- 
     </div>
   );
 }

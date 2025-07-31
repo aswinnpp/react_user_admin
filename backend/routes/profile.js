@@ -5,7 +5,7 @@ import upload from '../config/multer.js';
 
 const router = express.Router();
 
-// ✅ Route to get profile image
+
 router.get('/image', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -19,12 +19,12 @@ router.get('/image', verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Route to update profile image
+
 router.put('/uploads', verifyToken, upload.single('image'), async (req, res) => {
   try {
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.userId, // ✅ Comes from middleware
+      req.userId, 
       { image: req.file.filename },
       { new: true }
     );

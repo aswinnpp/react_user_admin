@@ -8,14 +8,12 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector(state => state.auth);
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     dispatch(loginStart());
-
     try {
       const res = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
@@ -23,11 +21,8 @@ export default function Login() {
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-
       const data = await res.json();
-      
       if (!res.ok) {
-        
         if (res.status === 401) {
           throw new Error('Invalid credentials. Please check your email and password.');
         } else if (res.status === 400) {
@@ -38,20 +33,9 @@ export default function Login() {
           throw new Error('Login failed. Please try again.');
         }
       }
-
-      const token = data.token;
       const user = data.user;
-
-      const userData = {
-        name: user.name,
-        id: user._id,
-        role: user.role, 
-        image: user.image || 'default.png', 
-      };
-
-      dispatch(loginSuccess({ token, user: userData }));
-
-      if (userData.role === 'admin') {
+      dispatch(loginSuccess({ user }));
+      if (user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/profile');

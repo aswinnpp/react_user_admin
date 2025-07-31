@@ -1,9 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// No localStorage usage for token or user; JWT handled via HTTP-only cookies
 const initialState = {
-  token: null,  // Stored in HttpOnly cookie
-  user: null,   // User info set on login, lost on refresh unless refetched
+  token: null,  // JWT stored in cookie, not Redux
+  user: null,
   loading: false,
   error: null
 };
@@ -18,7 +17,7 @@ const authSlice = createSlice({
     },
     loginSuccess(state, action) {
       state.loading = false;
-      state.token = null; // Cookie stores the JWT
+      state.token = null;
       state.user = action.payload.user;
     },
     loginFailure(state, action) {
@@ -35,6 +34,9 @@ const authSlice = createSlice({
       if (state.user) {
         state.user.image = action.payload;
       }
+    },
+    setUser(state, action) {
+      state.user = action.payload;
     }
   }
 });
@@ -44,7 +46,8 @@ export const {
   loginSuccess,
   loginFailure,
   logout,
-  updateImage
+  updateImage,
+  setUser
 } = authSlice.actions;
 
 export default authSlice.reducer;

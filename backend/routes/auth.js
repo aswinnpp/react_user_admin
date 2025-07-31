@@ -12,23 +12,22 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
-    // Validate required fields
+ 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
     
-    // Validate email format
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please enter a valid email address' });
     }
     
-    // Validate password length
+
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
-    
-    // Check if user already exists
+ 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'Email already exists' });
@@ -107,9 +106,24 @@ router.post('/login', async (req, res) => {
 
 
 router.get('/profile', verifyToken, async (req, res) => {
-  res.json({ message: `Hi ${req.user.name}, welcome to your profile!` });
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
+router.get('/me', verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ user }); // Works for both admin and user
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default router;
 

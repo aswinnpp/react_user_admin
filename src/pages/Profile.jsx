@@ -6,10 +6,9 @@ import "./Profile.css";
 import { updateImage, logout } from "../redux/authSlice";
 
 export default function Profile() {
-  const { user, token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [success, setSuccess] = useState("");
@@ -24,41 +23,11 @@ export default function Profile() {
     }
   }, [user?.image]);
 
- 
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      try {
-   ;
-       const response = await axios.get(
-  'http://localhost:5000/api/profile/image',
-  {
-    withCredentials: true, 
-  }
-);
-
-        if (response.data && response.data.image) {
-          setProfileImage(`http://localhost:5000/uploads/${response.data.image}`);
-          dispatch(updateImage(response.data.image));
-        }
-      } catch (error) {
-        console.error('Error fetching profile image:', error);
-      
-      }
-    };
-
-  
-    if (!user?.image || user.image === 'default.png') {
-      fetchProfileImage();
-    }
-  }, [user?.image, dispatch]);
-
   const handleImageChange = (e) => {
     const selected = e.target.files[0];
     if (selected) {
       setFile(selected);
       setSuccess("");
-      
-     
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewUrl(e.target.result);
@@ -70,45 +39,37 @@ export default function Profile() {
   const handleUpload = async () => {
     if (!file) return;
     setLoading(true);
-   
     const formData = new FormData();
     formData.append('image', file);
-
     try {
       const response = await axios.put(
-  'http://localhost:5000/api/profile/uploads',
-  formData,
-  {
-    withCredentials: true,
-  }
-);
-
+        'http://localhost:5000/api/profile/uploads',
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
       if (response.data && response.data.image) {
         dispatch(updateImage(response.data.image));
         setProfileImage(`http://localhost:5000/uploads/${response.data.image}`);
         setSuccess('Image uploaded successfully!');
         setFile(null);
-        setPreviewUrl(""); 
+        setPreviewUrl("");
       }
     } catch (error) {
       setSuccess('Failed to upload image.');
-      console.error('Upload error:', error);
     } finally {
       setLoading(false);
     }
   };
 
- const handleLogout = async () => {
-  try {
-    await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
-  } catch (error) {
-    console.error('Logout error:', error);
-  }
-
-  dispatch(logout());
-  navigate('/login');
-};
-
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+    } catch (error) {}
+    dispatch(logout());
+    navigate('/login');
+  };
 
   useEffect(() => {
     if (success) {
@@ -122,7 +83,6 @@ export default function Profile() {
   return (
     <div className="profile-container">
       <h2 className="h2">Welcome, {user?.name}</h2>
-
       <label htmlFor="fileInput">
         <img
           className="profile-img"
@@ -130,7 +90,6 @@ export default function Profile() {
           alt="Profile"
         />
       </label>
-
       <input
         id="fileInput"
         type="file"
@@ -138,13 +97,10 @@ export default function Profile() {
         onChange={handleImageChange}
         style={{ display: "none" }}
       />
-
       <button className="upload-btn" onClick={handleUpload} disabled={!file || loading}>
         {loading ? "Uploading..." : "Upload"}
       </button>
-
       {success && <p className="success">{success}</p>}
-
       <button className="logout-btn" onClick={handleLogout}>
         Logout
       </button>
