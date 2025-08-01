@@ -55,14 +55,14 @@ export default function Login() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="Email"
-          required
+          
         />
         <input
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
           placeholder="Password"
-          required
+          
         />
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}

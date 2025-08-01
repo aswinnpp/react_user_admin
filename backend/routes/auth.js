@@ -46,30 +46,29 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Validate email format
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please enter a valid email address' });
     }
 
-    // Check if user exists
+   
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Compare password
+   
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Sign JWT
+  
     const token = jwt.sign(
       {
         id: user._id,
@@ -80,15 +79,15 @@ router.post('/login', async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    // Set token in HTTP-only cookie
+   
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, // true in production with HTTPS
+      secure: false, 
       sameSite: 'Lax',
       maxAge: 24 * 60 * 60 * 1000
     });
 
-    // Send user info (no token in body)
+
     res.json({
       user: {
         _id: user._id,
@@ -105,6 +104,7 @@ router.post('/login', async (req, res) => {
 });
 
 
+
 router.get('/profile', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -115,11 +115,22 @@ router.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
+router.post('/logout', (req, res) => {
+
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true,     
+    sameSite: 'None',  
+  });
+
+  res.status(200).json({ message: 'Logged out successfully' });
+});
+
 router.get('/me', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ user }); // Works for both admin and user
+    res.json({ user }); 
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

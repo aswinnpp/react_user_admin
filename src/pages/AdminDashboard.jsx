@@ -165,11 +165,21 @@ export default function AdminDashboard() {
     return `http://localhost:5000/uploads/${user.image || 'default.png'}`;
   };
 
+ const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+    } catch (error) {}
+    dispatch(logout());
+    navigate('/login');
+  };
+
+
+
   return (
     <div className="admin-container">
       <div className="admin-header">
         <h2>Admin Dashboard</h2>
-        <button className="logout-btn" onClick={() => dispatch(logout())}>
+        <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
         <button

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  token: null,  // JWT stored in cookie, not Redux
+  token: null,  
   user: null,
   loading: false,
   error: null

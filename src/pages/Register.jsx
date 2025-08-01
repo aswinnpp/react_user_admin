@@ -56,7 +56,7 @@ export default function Register() {
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required
+          
         />
 
         <input
@@ -64,7 +64,7 @@ export default function Register() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
+          
         />
 
         <input
@@ -72,7 +72,7 @@ export default function Register() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
+          
         />
 
         <button type="submit" disabled={loading}>
